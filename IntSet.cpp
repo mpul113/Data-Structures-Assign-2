@@ -153,7 +153,7 @@ bool IntSet::isSubsetOf(const IntSet& otherIntSet) const
   {
     if (otherIntSet.contains(data[i]))
       ++count;
-    if (count >= used)
+    if (count == used)
       return true;
   }
   
@@ -202,15 +202,13 @@ IntSet IntSet::subtract(const IntSet& otherIntSet) const
   return newSet;
 }
 
-void IntSet::reset()
-{
-  used = 0;
-}
+void IntSet::reset() {used = 0;}
 
 bool IntSet::add(int anInt)
 {
   if (contains(anInt))
     return false;
+  
   if (used == capacity)
     resize( int(1.5 * capacity) + 1);
   
@@ -222,17 +220,22 @@ bool IntSet::add(int anInt)
 
 bool IntSet::remove(int anInt)
 {
-  if (contains(anInt))
-  {
-    for (int i = 0; i < (used -1); ++i)
-      if (data[i] == anInt)
-	swap(data[i], data[i + 1]);
+  IntSet tempSet;
 
-    --used;
-    return true;
-  }
-  else
+  if (!contains(anInt))
     return false;
+  else
+    {
+      for (int i = 0; i < used; ++i)
+	if(data[i] != anInt)
+	  tempSet.add(data[i]);
+
+      for (int j = 0; j < used; ++j)
+	data[j] = tempSet.data[j];
+
+      --used;
+      return true;
+    }
 }
 
 bool operator==(const IntSet& is1, const IntSet& is2)
@@ -241,7 +244,7 @@ bool operator==(const IntSet& is1, const IntSet& is2)
     return true;
   if (is1.size() != is2.size())
     return false;
-  if (is1.isSubsetOf(is2) || is2.isSubsetOf(is1))
+  if (is1.isSubsetOf(is2))
     return true;
   
   return false;
